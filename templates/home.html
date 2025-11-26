@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script>
+window.onload=function(){
+document.getElementById("first-button").addEventListener('click',function (){
+alert("The motors will now move in forward direction")
+})
+
+
+document.getElementById("second-button").addEventListener('click',function (){
+    alert("The motors will now move in reverse direction")
+})
+
+document.getElementById("third-button").addEventListener('click', function (){
+    alert("Motors rotate in left hand direction")
+})
+
+document.getElementById("fourth-button").addEventListener('click', function (){
+    alert("Motors rotate in right hand direction")
+})
+
+
+document.getElementById("fifth-button").addEventListener('click', function (){
+    alert("Motors speed will be high now")
+})
+
+document.getElementById("sixth-button").addEventListener('click', function (){
+    alert("Motors speed will reduce now")
+})
+
+document.getElementById("seventh-button").addEventListener('click', function (){
+    alert("Motors will be moderate now")
+})}
+
+
+    </script>
+</head>
+<body>
+    <h1>Welcome to this amazing rover</h1>
+    <div style="width:max-content; height:max-content; background-color: aliceblue; align-items: center;">
+<button id="first-button" type="button" >forward</button>
+<button id="second-button" type="button" >backward</button>
+<button id="third-button" type="button" >left</button>
+<button id="fourth-button" type="button" >right</button>
+<button id="fifth-button" type="button" >high</button>
+<button id="sixth-button" type="button" >low</button>
+<button id="seventh-button" type="button" >medium</button>
+    </div>
+</body>
+</html>
