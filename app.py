@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, jsonify, Response
 import RPi.GPIO as GPIO
-from picamera import PiCamera
+from picamera2 import PiCamera2 
 import io
 
 app = Flask(__name__)
 
-# GPIO pins for motor control
+# Motor Controller 1 (left motors) pins
 in1 = 22
 in2 = 24
 in3 = 16
@@ -13,26 +13,32 @@ in4 = 10
 en = 18
 en2 = 8
 
-# Setup for  GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(in1, GPIO.OUT)
-GPIO.setup(in2, GPIO.OUT)
-GPIO.setup(in3, GPIO.OUT)
-GPIO.setup(in4, GPIO.OUT)
-GPIO.setup(en, GPIO.OUT)
-GPIO.setup(en2, GPIO.OUT)
-GPIO.output(in1, GPIO.LOW)
-GPIO.output(in2, GPIO.LOW)
-GPIO.output(in3, GPIO.LOW)
-GPIO.output(in4, GPIO.LOW)
+# Motor Controller 2 (right motors) pins
+in5 = 17
+in6 = 27
+in7 = 11
+in8 = 23
+en3 = 13
+en4 = 19
 
-p = GPIO.PWM(en, 1000)
-p1 = GPIO.PWM(en2, 1000)
+# Setup GPIO
+GPIO.setmode(GPIO.BCM)
+for pin in [in1, in2, in3, in4, en, en2, in5, in6, in7, in8, en3, en4]:
+    GPIO.setup(pin, GPIO.OUT)
+    GPIO.output(pin, GPIO.LOW)
+
+# PWM for speed control
+p = GPIO.PWM(en, 100)
+p1 = GPIO.PWM(en2, 100)
+p2 = GPIO.PWM(en3, 100)
+p3 = GPIO.PWM(en4, 100)
 p.start(100)
 p1.start(100)
+p2.start(100)
+p3.start(100)
 
-
-camera = PiCamera()
+# Camera setup
+camera = PiCamera2()
 camera.resolution = (640, 480)
 camera.framerate = 24
 
@@ -48,60 +54,88 @@ def gen_frames():
 
 @app.route('/')
 def index():
-    return render_template('home.html')  
+    return render_template('home.html')
 
 @app.route('/motor', methods=['POST'])
 def motor_control():
     command = request.json.get('command')
 
     if command == 'forward':
+        # Motor Controller 1 forward
         GPIO.output(in1, GPIO.HIGH)
         GPIO.output(in3, GPIO.HIGH)
         GPIO.output(in2, GPIO.LOW)
         GPIO.output(in4, GPIO.LOW)
+        # Motor Controller 2 forward
+        GPIO.output(in5, GPIO.HIGH)
+        GPIO.output(in7, GPIO.HIGH)
+        GPIO.output(in6, GPIO.LOW)
+        GPIO.output(in8, GPIO.LOW)
         return jsonify({'status': 'motors moving forward'})
 
     elif command == 'backward':
+        # Motor Controller 1 backward
         GPIO.output(in1, GPIO.LOW)
         GPIO.output(in3, GPIO.LOW)
         GPIO.output(in2, GPIO.HIGH)
         GPIO.output(in4, GPIO.HIGH)
-        return jsonify({'status': 'moving in reverse now'})
+        # Motor Controller 2 backward
+        GPIO.output(in5, GPIO.LOW)
+        GPIO.output(in7, GPIO.LOW)
+        GPIO.output(in6, GPIO.HIGH)
+        GPIO.output(in8, GPIO.HIGH)
+        return jsonify({'status': 'motors moving backward'})
 
     elif command == 'left':
+        # Left side motors backward
         GPIO.output(in1, GPIO.LOW)
+        GPIO.output(in3, GPIO.LOW)
         GPIO.output(in2, GPIO.HIGH)
-        GPIO.output(in3, GPIO.HIGH)
-        GPIO.output(in4, GPIO.LOW)
-        return jsonify({'status': 'moving in left direction'})
+        GPIO.output(in4, GPIO.HIGH)
+        # Right side motors forward
+        GPIO.output(in5, GPIO.HIGH)
+        GPIO.output(in7, GPIO.HIGH)
+        GPIO.output(in6, GPIO.LOW)
+        GPIO.output(in8, GPIO.LOW)
+        return jsonify({'status': 'turning left'})
 
     elif command == 'right':
+        # Left side motors forward
         GPIO.output(in1, GPIO.HIGH)
+        GPIO.output(in3, GPIO.HIGH)
         GPIO.output(in2, GPIO.LOW)
-        GPIO.output(in3, GPIO.LOW)
-        GPIO.output(in4, GPIO.HIGH)
-        return jsonify({'status': 'moving in the right direction'})
+        GPIO.output(in4, GPIO.LOW)
+        # Right side motors backward
+        GPIO.output(in5, GPIO.LOW)
+        GPIO.output(in7, GPIO.LOW)
+        GPIO.output(in6, GPIO.HIGH)
+        GPIO.output(in8, GPIO.HIGH)
+        return jsonify({'status': 'turning right'})
 
     elif command == 'high':
         p.ChangeDutyCycle(100)
         p1.ChangeDutyCycle(100)
+        p2.ChangeDutyCycle(100)
+        p3.ChangeDutyCycle(100)
         return jsonify({'status': 'motor speed set to high'})
 
     elif command == 'medium':
         p.ChangeDutyCycle(50)
         p1.ChangeDutyCycle(50)
+        p2.ChangeDutyCycle(50)
+        p3.ChangeDutyCycle(50)
         return jsonify({'status': 'motor speed set to medium'})
 
     elif command == 'low':
         p.ChangeDutyCycle(25)
         p1.ChangeDutyCycle(25)
+        p2.ChangeDutyCycle(25)
+        p3.ChangeDutyCycle(25)
         return jsonify({'status': 'motor speed set to low'})
 
     elif command == 'stop':
-        GPIO.output(in1, GPIO.LOW)
-        GPIO.output(in2, GPIO.LOW)
-        GPIO.output(in3, GPIO.LOW)
-        GPIO.output(in4, GPIO.LOW)
+        for pin in [in1, in2, in3, in4, in5, in6, in7, in8]:
+            GPIO.output(pin, GPIO.LOW)
         return jsonify({'status': 'motors stopped'})
 
     elif command == 'exit':
@@ -113,8 +147,7 @@ def motor_control():
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(gen_frames(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     try:
