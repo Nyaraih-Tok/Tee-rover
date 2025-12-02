@@ -1,50 +1,174 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Rover Control Interface</title>
-</head>
-<body>
-    <h1>Welcome to this amazing rover</h1>
-    <h2>Live Camera Feed</h2>
-    <img src="/video_feed" width="640" height="480" />
 
-    <div style="width:max-content; height:max-content; background-color: aliceblue; align-items: center; padding: 10px; display: flex; gap: 10px;">
-        <button id="first-button" type="button">forward</button>
-        <button id="second-button" type="button">backward</button>
-        <button id="third-button" type="button">left</button>
-        <button id="fourth-button" type="button">right</button>
-        <button id="fifth-button" type="button">high</button>
-        <button id="sixth-button" type="button">low</button>
-        <button id="seventh-button" type="button">medium</button>
-        <button id="stop" type="button">stop</button>
-    </div>
+    <title>4Wheel Rover Control</title>
 
-    <script>
-     
-        function sendCommand(command) {
-            fetch('/motor', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({command: command})
-            })
-            .then(response => response.json())
-            .then(data => alert(data.status))
-            .catch(error => console.error('Error:', error));
+    <style>
+
+        body { font-family: Arial, sans-serif; text-align: center; background: #f0f0f0; }
+
+        h1 { color: #333; }
+
+        .camera { border: 2px solid #333; margin: 20px; }
+
+        .controls { 
+
+            background: aliceblue; 
+
+            width: max-content; 
+
+            margin: 20px auto; 
+
+            padding: 20px; 
+
+            border-radius: 10px; 
+
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
         }
 
-       
-        document.getElementById("first-button").addEventListener('click', () => sendCommand('forward'));
-        document.getElementById("second-button").addEventListener('click', () => sendCommand('backward'));
-        document.getElementById("third-button").addEventListener('click', () => sendCommand('left'));
-        document.getElementById("fourth-button").addEventListener('click', () => sendCommand('right'));
-        document.getElementById("fifth-button").addEventListener('click', () => sendCommand('high'));
-        document.getElementById("sixth-button").addEventListener('click', () => sendCommand('low'));
-        document.getElementById("seventh-button").addEventListener('click', () => sendCommand('medium'));
+        button { 
+
+            padding: 15px 20px; 
+
+            margin: 5px; 
+
+            font-size: 16px; 
+
+            border: none; 
+
+            border-radius: 8px; 
+
+            cursor: pointer; 
+
+            transition: all 0.3s;
+
+        }
+
+        .forward { background: #4CAF50; color: white; }
+
+        .backward { background: #f44336; color: white; }
+
+        .turn { background: #ff9800; color: white; }
+
+        .speed { background: #2196F3; color: white; }
+
+        .stop { background: #9E9E9E; color: white; font-size: 18px; font-weight: bold; }
+
+        button:hover { transform: scale(1.05); }
+
+        button:active { transform: scale(0.95); }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>?? 4WD Rover Control Interface</h1>
+
+    <h2>?? Live Camera Feed</h2>
+
+    <img src="/video_feed" class="camera" width="640" height="480" />
+
+
+
+    <div class="controls">
+
+        <div>
+
+            <button id="forward" class="forward">?? FORWARD</button>
+
+            <button id="backward" class="backward">?? BACKWARD</button>
+
+        </div>
+
+        <div>
+
+            <button id="left" class="turn">? LEFT</button>
+
+            <button id="stop" class="stop">?? STOP</button>
+
+            <button id="right" class="turn">? RIGHT</button>
+
+        </div>
+
+        <div>
+
+            <button id="low" class="speed">?? LOW</button>
+
+            <button id="medium" class="speed">?? MEDIUM</button>
+
+            <button id="high" class="speed">? HIGH</button>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        function sendCommand(command) {
+
+            fetch('/motor', {
+
+                method: 'POST',
+
+                headers: { 'Content-Type': 'application/json' },
+
+                body: JSON.stringify({command: command})
+
+            })
+
+            .then(response => response.json())
+
+            .then(data => {
+
+                console.log(data.status);
+
+           
+
+                event.target.style.background = '#666';
+
+                setTimeout(() => event.target.style.background = '', 200);
+
+            })
+
+            .catch(error => console.error('Error:', error));
+
+        }
+
+
+
+ 
+
+        document.getElementById("forward").addEventListener('click', () => sendCommand('forward'));
+
+        document.getElementById("backward").addEventListener('click', () => sendCommand('backward'));
+
+        document.getElementById("left").addEventListener('click', () => sendCommand('left'));
+
+        document.getElementById("right").addEventListener('click', () => sendCommand('right'));
+
+        document.getElementById("high").addEventListener('click', () => sendCommand('high'));
+
+        document.getElementById("medium").addEventListener('click', () => sendCommand('medium'));
+
+        document.getElementById("low").addEventListener('click', () => sendCommand('low'));
+
         document.getElementById("stop").addEventListener('click', () => sendCommand('stop'));
+
     </script>
+
 </body>
+
 </html>
+
